@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.scanner_api.R
-import com.example.scanner_impl.di.ScannerFeatureComponentHolder
+import com.example.scanner_impl.di.ScannerFeatureComponent
 import com.example.scanner_impl.presentation.presenter.ScannerPresenter
 import dagger.Lazy
 import moxy.MvpAppCompatFragment
@@ -28,7 +28,7 @@ internal class ScannerMainFragment : MvpAppCompatFragment(), ScannerMainView {
     }
 
     init {
-        ScannerFeatureComponentHolder.getComponent().inject(this)
+        ScannerFeatureComponent.get().inject(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

@@ -1,14 +1,43 @@
 package com.example.module_injector
 
-interface ComponentHolder<C : BaseAPI, D : BaseDependencies> {
+internal class ComponentHolder<T : ComponentApi>(private val componentFactory: ComponentFactory<T>,
+                                                 private val componentsManager: ComponentManager) {
 
-    fun init(dependencies: D)
+    private var component: T? = null
 
-    fun get(): C
+    private var ownerCount = 0
 
-    fun reset()
+    @Synchronized
+    fun getOrCreate(): T {
+        if (component == null) {
+            component = componentFactory.create(componentsManager)
+        }
+        if (component!!.isReleasable()) {
+            ownerCount++
+        }
+        return component!!
+    }
+
+    @Synchronized
+    fun getWithoutRef(): T {
+        if (component == null) {
+            throw IllegalStateException("Component isn't created yet!")
+        }
+        return component!!
+    }
+
+    @Synchronized
+    fun release() {
+        if (component!!.isReleasable()) {
+            if (component == null) return
+            ownerCount--
+            if (ownerCount <= 0) {
+                releaseComponent()
+            }
+        }
+    }
+
+    private fun releaseComponent() {
+        component = null
+    }
 }
-
-interface BaseDependencies
-
-interface BaseAPI

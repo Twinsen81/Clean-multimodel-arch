@@ -1,8 +1,8 @@
 package com.example.core_network_api.di
 
 import com.example.core_network_api.data.HttpClient
-import com.example.module_injector.BaseAPI
+import com.example.module_injector.ComponentApi
 
-interface CoreNetworkApi: BaseAPI {
+interface CoreNetworkApi : ComponentApi {
     fun httpClient(): HttpClient
 }

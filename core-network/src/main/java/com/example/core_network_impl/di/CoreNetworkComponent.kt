@@ -1,25 +1,25 @@
 package com.example.core_network_impl.di
 
 import com.example.core_network_api.di.CoreNetworkApi
+import com.example.module_injector.ComponentFactory
+import com.example.module_injector.ComponentManager
+import com.example.module_injector.RootComponentManager
 import dagger.Component
 import javax.inject.Singleton
 
 @Component(modules = [NetworkModule::class])
 @Singleton
-abstract class CoreNetworkComponent : CoreNetworkApi {
+internal abstract class CoreNetworkComponent : CoreNetworkApi {
     companion object {
-        @Volatile
-        private var coreNetworkComponent: CoreNetworkComponent? = null
+        fun get(): CoreNetworkComponent =
+                RootComponentManager.getComponent(CoreNetworkApi::class) as CoreNetworkComponent
 
-        fun get(): CoreNetworkComponent {
-            if (coreNetworkComponent == null) {
-                synchronized(CoreNetworkComponent::class.java) {
-                    if (coreNetworkComponent == null) {
-                        coreNetworkComponent = DaggerCoreNetworkComponent.builder().build()
-                    }
-                }
-            }
-            return coreNetworkComponent!!
-        }
+        fun release() = RootComponentManager.releaseComponent(CoreNetworkApi::class)
+    }
+}
+
+class CoreNetworkComponentFactory : ComponentFactory<CoreNetworkApi> {
+    override fun create(componentManager: ComponentManager): CoreNetworkApi {
+        return DaggerCoreNetworkComponent.builder().build()
     }
 }

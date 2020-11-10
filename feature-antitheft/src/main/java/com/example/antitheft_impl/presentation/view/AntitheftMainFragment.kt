@@ -5,9 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import com.example.antitheft_impl.di.AntitheftFeatureComponentHolder
-import com.example.antitheft_impl.presentation.presenter.AntitheftPresenter
 import com.example.antitheft_api.R
+import com.example.antitheft_impl.di.AntitheftFeatureComponent
+import com.example.antitheft_impl.presentation.presenter.AntitheftPresenter
 import dagger.Lazy
 import moxy.MvpAppCompatFragment
 import moxy.presenter.InjectPresenter
@@ -27,7 +27,7 @@ internal class AntitheftMainFragment : MvpAppCompatFragment(), AntitheftMainView
     }
 
     init {
-        AntitheftFeatureComponentHolder.getComponent().inject(this)
+        AntitheftFeatureComponent.get().inject(this)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

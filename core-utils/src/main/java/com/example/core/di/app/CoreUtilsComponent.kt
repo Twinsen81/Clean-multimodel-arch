@@ -1,5 +1,8 @@
 package com.example.core.di.app
 
+import com.example.module_injector.ComponentFactory
+import com.example.module_injector.ComponentManager
+import com.example.module_injector.RootComponentManager
 import dagger.Component
 import javax.inject.Singleton
 
@@ -7,18 +10,15 @@ import javax.inject.Singleton
 @Singleton
 abstract class CoreUtilsComponent : CoreUtilsApi {
     companion object {
-        @Volatile
-        private var coreUtilsComponent: CoreUtilsComponent? = null
+        fun get(): CoreUtilsComponent =
+                RootComponentManager.getComponent(CoreUtilsApi::class) as CoreUtilsComponent
 
-        fun get(): CoreUtilsComponent {
-            if (coreUtilsComponent == null) {
-                synchronized(CoreUtilsComponent::class.java) {
-                    if (coreUtilsComponent == null) {
-                        coreUtilsComponent = DaggerCoreUtilsComponent.builder().build()
-                    }
-                }
-            }
-            return coreUtilsComponent!!
-        }
+        fun release() = RootComponentManager.releaseComponent(CoreUtilsApi::class)
+    }
+}
+
+class CoreUtilsComponentFactory : ComponentFactory<CoreUtilsApi> {
+    override fun create(componentManager: ComponentManager): CoreUtilsApi {
+        return DaggerCoreUtilsComponent.builder().build()
     }
 }

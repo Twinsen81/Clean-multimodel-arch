@@ -1,8 +1,8 @@
 package com.example.core.di.app
 
 import com.example.core.utils.SomeUtils
-import com.example.module_injector.BaseAPI
+import com.example.module_injector.ComponentApi
 
-interface CoreUtilsApi : BaseAPI {
+interface CoreUtilsApi : ComponentApi {
     fun someUtils(): SomeUtils
 }

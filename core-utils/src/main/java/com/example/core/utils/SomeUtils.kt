@@ -4,4 +4,4 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SomeUtils @Inject constructor()
+open class SomeUtils @Inject constructor()
