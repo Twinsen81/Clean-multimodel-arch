@@ -2,19 +2,43 @@ package com.example.module_injector
 
 import kotlin.reflect.KClass
 
+/**
+ * Менеджер управляет жизненным циклом компонентов приложения:
+ * - Создаёт компоненты через зарегистрированные фабрики
+ * - Хранит ссылку на уже созданный компонент, предоставляет её другим компонентам (клиентам)
+ * - Ведёт учёт предоставленных ссылок для "освобождения" (доступен для сбора GC-ом)
+ * компонента после того как на него не остаётся ни одной ссылки
+ */
 interface ComponentManager {
+    /**
+     * Зарегистрировать фабрику, которую менеджер будет использовать для создания
+     * компонентов, реализующих интерфейс API [klass]
+     */
     fun <T : ComponentApi> registerFactory(factory: ComponentFactory<T>, klass: KClass<T>)
+
+    /**
+     * Получить компонент с указанными свойствами [properties]
+     * Если компонент ещё не создан, то он будет создан.
+     * Используйте этот метод для получения ссылки на компонент в классах,
+     * использующих его в качестве одной из своих зависимостей (клиентах)
+     */
     fun <T : ComponentApi> getOrCreateComponent(properties: ComponentProperties<T>): T
+
+    /**
+     * Получить компонент реализующий интерфейс API [klass]
+     * Если компонент ещё не создан, то будет брошено исключение IllegalStateException.
+     * Используйте этот метод для доступа к компоненту внутри gradle-модуля самого компонента, т.е.
+     * внутри класса, реализующего интерфейс API [klass].
+     * Данный метод не влияет на учёт ссылок на компонент для его освобождения
+     * в методе [releaseComponent]
+     */
     fun <T : ComponentApi> getComponent(klass: KClass<T>): T
+
+    /**
+     * Освободить компонент - он больше не используется вызывающим данный метод клиентом.
+     * Если нет других клиентов, использующих данный компонент, то ссылка на компонент зануляется,
+     * и он становится доступным для сбора Garbage Collector-ом.
+     * При следующем вызове [getOrCreateComponent] будет создан новый экземпляр компонента
+     */
     fun <T : ComponentApi> releaseComponent(klass: KClass<T>)
 }
-
-interface ComponentFactory<T : ComponentApi> {
-    fun create(componentManager: ComponentManager): T
-}
-
-interface ComponentApi {
-    fun isReleasable(): Boolean = true
-}
-
-data class ComponentProperties<T : ComponentApi>(val klass: KClass<T>)

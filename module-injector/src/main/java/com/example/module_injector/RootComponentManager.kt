@@ -2,6 +2,9 @@ package com.example.module_injector
 
 import kotlin.reflect.KClass
 
+/**
+ * Реализация менеджера компонентов [ComponentManager] c подсчётом ссылок, выданных клиентам
+ */
 object RootComponentManager : ComponentManager {
 
     private val holderStorage = mutableMapOf<String, ComponentHolder<out ComponentApi>>()
@@ -9,25 +12,18 @@ object RootComponentManager : ComponentManager {
 
 
     override fun <T : ComponentApi> registerFactory(factory: ComponentFactory<T>, klass: KClass<T>) {
-        factoryStorage[klass.simpleName!!] = factory
+        factoryStorage[klass.qualifiedName!!] = factory
     }
 
-    /**
-     * Получить созданный ранее компонент или создать новый.
-     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ComponentApi> getOrCreateComponent(properties: ComponentProperties<T>): T {
         return getComponentHolder(properties.klass).getOrCreate()
     }
 
-    /**
-     * Получить созданный ранее компонент.
-     * Если он ещё не создавался, то будет брошено исключение IllegalStateException
-     */
     @Suppress("UNCHECKED_CAST")
     override fun <T : ComponentApi> getComponent(klass: KClass<T>): T {
-        if (!factoryStorage.contains(klass.simpleName!!))
-            throw IllegalStateException("Factory for ${klass.simpleName!!} not registered")
+        if (!factoryStorage.contains(klass.qualifiedName!!))
+            throw IllegalStateException("Factory for ${klass.qualifiedName!!} not registered")
         return getComponentHolder(klass).getWithoutRef()
     }
 
@@ -37,7 +33,7 @@ object RootComponentManager : ComponentManager {
 
     @Suppress("UNCHECKED_CAST")
     private fun <T : ComponentApi> getComponentHolder(klass: KClass<T>): ComponentHolder<T> {
-        val key = klass.simpleName!!
+        val key = klass.qualifiedName!!
         return holderStorage.getOrElse(key) {
             val componentHolder = ComponentHolder(getFactoryForClass(klass), this)
             holderStorage[key] = componentHolder
@@ -47,8 +43,8 @@ object RootComponentManager : ComponentManager {
 
     @Suppress("UNCHECKED_CAST")
     private fun <T : ComponentApi> getFactoryForClass(klass: KClass<T>): ComponentFactory<T> {
-        if (!factoryStorage.contains(klass.simpleName!!))
-            throw IllegalStateException("Factory for ${klass.simpleName!!} not registered")
-        return factoryStorage[klass.simpleName!!] as ComponentFactory<T>
+        if (!factoryStorage.contains(klass.qualifiedName!!))
+            throw IllegalStateException("Factory for ${klass.qualifiedName!!} not registered")
+        return factoryStorage[klass.qualifiedName!!] as ComponentFactory<T>
     }
 }
